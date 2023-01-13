@@ -36,12 +36,14 @@ void main() {
       final badEmailUser = service.createUser(
           email: 'zangane@sedi.com', password: 'anyPassword');
 
-      expect(badEmailUser, throwsA(const TypeMatcher<UserNotFoundAuthException>()));
+      expect(badEmailUser,
+          throwsA(const TypeMatcher<UserNotFoundAuthException>()));
 
       final badPasswordUser =
           service.createUser(email: 'someone@sedi.com', password: '3317');
 
-      expect(badPasswordUser, throwsA(const TypeMatcher<WrongPasswordAuthException>()));
+      expect(badPasswordUser,
+          throwsA(const TypeMatcher<WrongPasswordAuthException>()));
 
       final user = await service.createUser(email: 'sedi', password: '3653');
       expect(service.currentUser, user);
@@ -94,7 +96,7 @@ class MockAuthProvider implements AuthProvider {
     if (!isInitialized) throw NotInitializedException();
     if (email == 'zangane@sedi.com') throw UserNotFoundAuthException();
     if (password == '3317') throw WrongPasswordAuthException();
-    const user = AuthUser(isEmailVerified: false);
+    const user = AuthUser(isEmailVerified: false, email: 'zangane@sedi.com');
     _user = user;
     return Future.value(user);
   }
@@ -112,7 +114,7 @@ class MockAuthProvider implements AuthProvider {
     if (!isInitialized) throw NotInitializedException();
     final user = _user;
     if (user == null) throw UserNotFoundAuthException();
-    const newUser = AuthUser(isEmailVerified: true);
+    const newUser = AuthUser(isEmailVerified: true, email: 'zangane@sedi.com');
     _user = newUser;
   }
 }
