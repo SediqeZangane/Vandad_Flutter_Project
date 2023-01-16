@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:vandad_flutter_project/constants/routes.dart';
-import 'package:vandad_flutter_project/utilities/show_error_dialog.dart';
 import 'package:vandad_flutter_project/services/auth/auth_service.dart';
+import 'package:vandad_flutter_project/utilities/dialogs/error_dialog.dart';
 
 import '../services/auth/auth_exceptions.dart';
 
