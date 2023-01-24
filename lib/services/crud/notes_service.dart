@@ -3,12 +3,15 @@ import 'package:flutter/foundation.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart';
+import 'package:vandad_flutter_project/extensions/list/filter.dart';
 import 'package:vandad_flutter_project/services/crud/crud_exceptions.dart';
 
 class NotesService {
   Database? _db;
 
   List<DatabaseNote> _notes = [];
+
+  DatabaseUser? _user;
 
   static final NotesService _shared = NotesService._sharedInstance();
 
@@ -24,15 +27,46 @@ class NotesService {
 
   late final StreamController<List<DatabaseNote>> _notesStreamController;
 
-  Stream<List<DatabaseNote>> get allNotes => _notesStreamController.stream;
+  // Stream<List<DatabaseNote>> get allNotes => _notesStreamController.stream;
 
-  Future<DatabaseUser> getOrCreateUser({required String email}) async {
+  Stream<List<DatabaseNote>> get allNotes =>
+      _notesStreamController.stream.map((data) {
+        final filteredData = data.where((note) {
+          final currentUser = _user;
+          if (currentUser != null) {
+            return note.userId == currentUser.id;
+          } else {
+            throw UserShouldBeSetBeforeReadingAllNotes();
+          }
+        }).toList();
+
+        return filteredData;
+      });
+
+  // _notesStreamController.stream.filter((note) {
+  //   final currentUser = _user;
+  //   if (currentUser != null) {
+  //     return note.userId == currentUser.id;
+  //   } else {
+  //     throw UserShouldBeSetBeforeReadingAllNotes();
+  //   }
+  // });
+
+  Future<DatabaseUser> getOrCreateUser({
+    required String email,
+    bool setAsCurrentUser = true,
+  }) async {
     try {
       final user = await getUser(email: email);
+      if (setAsCurrentUser) {
+        _user = user;
+      }
       return user;
     } on CouldNotFindUser catch (_) {
       final createdUser = await createUser(email: email);
-
+      if (setAsCurrentUser) {
+        _user = createdUser;
+      }
       return createdUser;
     } catch (e) {
       rethrow;
@@ -345,7 +379,7 @@ class DatabaseNote {
         userId = mapNote[userIdColumn] as int,
         text = mapNote[textColumn] as String,
         isSyncedWithCloud =
-            (mapNote[isSyncedWithCloudColumn] as int) == 1 ? true : false;
+        (mapNote[isSyncedWithCloudColumn] as int) == 1 ? true : false;
 
   // mapNote<String ,Object?> {
   //
@@ -371,9 +405,9 @@ class DatabaseNote {
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-      other is DatabaseNote &&
-          runtimeType == other.runtimeType &&
-          id == other.id;
+          other is DatabaseNote &&
+              runtimeType == other.runtimeType &&
+              id == other.id;
 
   @override
   int get hashCode => id.hashCode;

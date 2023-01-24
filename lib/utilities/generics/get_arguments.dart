@@ -1,0 +1,24 @@
+import 'package:flutter/material.dart' show BuildContext, ModalRoute;
+
+extension GetArgument on BuildContext {
+  T? getArgument<T>() {
+    final modalRoute = ModalRoute.of(this);
+    if (modalRoute != null) {
+      final args = modalRoute.settings.arguments;
+      if (args != null && args is T) {
+        return args as T;
+      }
+    }
+    return null;
+  }
+}
+
+extension AAAAA on String{
+  bool isHasMahdi(){
+    return contains('Mahdi');
+  }
+}
+
+bool isHasMahdi(String s){
+  return s.contains('Mahdi');
+}
